@@ -1,0 +1,381 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1101AFA86D32FB55A0FECEAE /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77370CC8D98C8B8D6BA443DE /* AVFoundation.framework */; };
+		2235326D0F83DC3F2B2DE10D /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBD985921EAE031D89376FDC /* WebKit.framework */; };
+		387FED2993050F4673B2ECAE /* SpeechListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF3BF7264DC8D6B591E0AC6 /* SpeechListener.swift */; };
+		481C5C61C54716FF8E9E889D /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE178C130BAB8A7FD87B8E7B /* Session.swift */; };
+		5A1BDCD32EB681D7577AB558 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871457E8CB242624471556E4 /* ContentView.swift */; };
+		64A399DEB43BCF76EE49EA23 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A4A3B866BD74C590DC8BE02 /* Cocoa.framework */; };
+		662E176560BAC36B978C05B6 /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B225F6395D121F22483799 /* CameraService.swift */; };
+		710D9CDF6C06C5355573D89C /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B72F6048BACEC609CBA8843 /* Config.swift */; };
+		8187FA5194B11828E4C1DAB1 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E479B65950B3D078EFB57550 /* Speaker.swift */; };
+		93FA6535448EB52D65D20C0C /* HotkeyMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1102265F29FE12F84A30579 /* HotkeyMonitor.swift */; };
+		A1E1BE7B77779CE30ED79D65 /* SystemPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3074E35AFADB535B1FDD285 /* SystemPrompt.swift */; };
+		A6CCCE939284070C2A29CCEA /* Speech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5548A8FDBE95FAB5A11F0031 /* Speech.framework */; };
+		A8CC48D33D0F67E5432FFD71 /* WhiteboredApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C52CFF59400E5783EBCCD770 /* WhiteboredApp.swift */; };
+		DAFD65BC7B287EE407CD78C8 /* TutorClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB611D1595BE27E8C760E17 /* TutorClient.swift */; };
+		F489337CD20880BCB3AB9FC7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A88F468F989F9FDE9ABB7C2 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1A88F468F989F9FDE9ABB7C2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1B72F6048BACEC609CBA8843 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		4A4A3B866BD74C590DC8BE02 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		505A848836FA33DEA1989A29 /* Whitebored.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Whitebored.entitlements; sourceTree = "<group>"; };
+		5548A8FDBE95FAB5A11F0031 /* Speech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speech.framework; path = System/Library/Frameworks/Speech.framework; sourceTree = SDKROOT; };
+		61678D18CFBB5564559AB828 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		77370CC8D98C8B8D6BA443DE /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		7EF3BF7264DC8D6B591E0AC6 /* SpeechListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechListener.swift; sourceTree = "<group>"; };
+		871457E8CB242624471556E4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B3B225F6395D121F22483799 /* CameraService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
+		BBD985921EAE031D89376FDC /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		C52CFF59400E5783EBCCD770 /* WhiteboredApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboredApp.swift; sourceTree = "<group>"; };
+		D1102265F29FE12F84A30579 /* HotkeyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyMonitor.swift; sourceTree = "<group>"; };
+		D3074E35AFADB535B1FDD285 /* SystemPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPrompt.swift; sourceTree = "<group>"; };
+		DE178C130BAB8A7FD87B8E7B /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		E479B65950B3D078EFB57550 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
+		EFB611D1595BE27E8C760E17 /* TutorClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorClient.swift; sourceTree = "<group>"; };
+		F3EB431318987DB70B70D547 /* Whitebored.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Whitebored.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5ED88AFD69FE2C61427C4AC0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2235326D0F83DC3F2B2DE10D /* WebKit.framework in Frameworks */,
+				A6CCCE939284070C2A29CCEA /* Speech.framework in Frameworks */,
+				1101AFA86D32FB55A0FECEAE /* AVFoundation.framework in Frameworks */,
+				64A399DEB43BCF76EE49EA23 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2508C30D76D4E522E1BEF297 /* Whitebored */ = {
+			isa = PBXGroup;
+			children = (
+				1A88F468F989F9FDE9ABB7C2 /* Assets.xcassets */,
+				B3B225F6395D121F22483799 /* CameraService.swift */,
+				1B72F6048BACEC609CBA8843 /* Config.swift */,
+				871457E8CB242624471556E4 /* ContentView.swift */,
+				D1102265F29FE12F84A30579 /* HotkeyMonitor.swift */,
+				61678D18CFBB5564559AB828 /* Info.plist */,
+				DE178C130BAB8A7FD87B8E7B /* Session.swift */,
+				E479B65950B3D078EFB57550 /* Speaker.swift */,
+				7EF3BF7264DC8D6B591E0AC6 /* SpeechListener.swift */,
+				D3074E35AFADB535B1FDD285 /* SystemPrompt.swift */,
+				EFB611D1595BE27E8C760E17 /* TutorClient.swift */,
+				505A848836FA33DEA1989A29 /* Whitebored.entitlements */,
+				C52CFF59400E5783EBCCD770 /* WhiteboredApp.swift */,
+			);
+			path = Whitebored;
+			sourceTree = "<group>";
+		};
+		9059A4B8EDEA18C3B98BCCAB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F3EB431318987DB70B70D547 /* Whitebored.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A5C8ADFC9F62DE5FA0C767D1 = {
+			isa = PBXGroup;
+			children = (
+				2508C30D76D4E522E1BEF297 /* Whitebored */,
+				D7ED7E8CAEBABEE4EB813F30 /* Frameworks */,
+				9059A4B8EDEA18C3B98BCCAB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D7ED7E8CAEBABEE4EB813F30 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				77370CC8D98C8B8D6BA443DE /* AVFoundation.framework */,
+				4A4A3B866BD74C590DC8BE02 /* Cocoa.framework */,
+				5548A8FDBE95FAB5A11F0031 /* Speech.framework */,
+				BBD985921EAE031D89376FDC /* WebKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FE426C09015D72714C3A8D10 /* Whitebored */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D657721B8F28972643BEA584 /* Build configuration list for PBXNativeTarget "Whitebored" */;
+			buildPhases = (
+				A42EE7748530DBB319FFE57B /* Sources */,
+				F7588D9F52554084F8494A15 /* Resources */,
+				5ED88AFD69FE2C61427C4AC0 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Whitebored;
+			packageProductDependencies = (
+			);
+			productName = Whitebored;
+			productReference = F3EB431318987DB70B70D547 /* Whitebored.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3D1904DB424D673CC82BF047 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					FE426C09015D72714C3A8D10 = {
+						ProvisioningStyle = Manual;
+					};
+				};
+			};
+			buildConfigurationList = 51136D55D903132E6CE41F80 /* Build configuration list for PBXProject "Whitebored" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = A5C8ADFC9F62DE5FA0C767D1;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 9059A4B8EDEA18C3B98BCCAB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FE426C09015D72714C3A8D10 /* Whitebored */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F7588D9F52554084F8494A15 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F489337CD20880BCB3AB9FC7 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A42EE7748530DBB319FFE57B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				662E176560BAC36B978C05B6 /* CameraService.swift in Sources */,
+				710D9CDF6C06C5355573D89C /* Config.swift in Sources */,
+				5A1BDCD32EB681D7577AB558 /* ContentView.swift in Sources */,
+				93FA6535448EB52D65D20C0C /* HotkeyMonitor.swift in Sources */,
+				481C5C61C54716FF8E9E889D /* Session.swift in Sources */,
+				8187FA5194B11828E4C1DAB1 /* Speaker.swift in Sources */,
+				387FED2993050F4673B2ECAE /* SpeechListener.swift in Sources */,
+				A1E1BE7B77779CE30ED79D65 /* SystemPrompt.swift in Sources */,
+				DAFD65BC7B287EE407CD78C8 /* TutorClient.swift in Sources */,
+				A8CC48D33D0F67E5432FFD71 /* WhiteboredApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1E7B2EB1F95A15EBFCBA6708 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		497F61C66E1EB0E046943B43 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Whitebored/Whitebored.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Whitebored/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.whitebored.app;
+				PRODUCT_NAME = Whitebored;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+			};
+			name = Debug;
+		};
+		A1F8631A1CC7F108E5545754 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Whitebored/Whitebored.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Whitebored/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.whitebored.app;
+				PRODUCT_NAME = Whitebored;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+			};
+			name = Release;
+		};
+		E0274023F1629C067D587904 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		51136D55D903132E6CE41F80 /* Build configuration list for PBXProject "Whitebored" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E0274023F1629C067D587904 /* Debug */,
+				1E7B2EB1F95A15EBFCBA6708 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D657721B8F28972643BEA584 /* Build configuration list for PBXNativeTarget "Whitebored" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				497F61C66E1EB0E046943B43 /* Debug */,
+				A1F8631A1CC7F108E5545754 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3D1904DB424D673CC82BF047 /* Project object */;
+}

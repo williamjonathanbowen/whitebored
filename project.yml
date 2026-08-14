@@ -1,0 +1,43 @@
+name: Whitebored
+options:
+  bundleIdPrefix: com.whitebored
+  createIntermediateGroups: true
+  deploymentTarget:
+    macOS: "14.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+targets:
+  Whitebored:
+    type: application
+    platform: macOS
+    sources:
+      - Whitebored
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.whitebored.app
+        PRODUCT_NAME: Whitebored
+        INFOPLIST_FILE: Whitebored/Info.plist
+        GENERATE_INFOPLIST_FILE: false
+        CODE_SIGN_ENTITLEMENTS: Whitebored/Whitebored.entitlements
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        ENABLE_HARDENED_RUNTIME: true
+        COMBINE_HIDPI_IMAGES: true
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_STRICT_CONCURRENCY: minimal
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+    dependencies:
+      - sdk: WebKit.framework
+      - sdk: Speech.framework
+      - sdk: AVFoundation.framework
+      - sdk: Cocoa.framework
+schemes:
+  Whitebored:
+    build:
+      targets:
+        Whitebored: all
+    run:
+      config: Debug
