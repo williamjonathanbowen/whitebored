@@ -20,6 +20,7 @@
 		A1E1BE7B77779CE30ED79D65 /* SystemPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3074E35AFADB535B1FDD285 /* SystemPrompt.swift */; };
 		A6CCCE939284070C2A29CCEA /* Speech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5548A8FDBE95FAB5A11F0031 /* Speech.framework */; };
 		A8CC48D33D0F67E5432FFD71 /* WhiteboredApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C52CFF59400E5783EBCCD770 /* WhiteboredApp.swift */; };
+		BABCF3AE3CC918E2C01E0AAB /* LessonStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D9773520F3CCD3766D0079 /* LessonStore.swift */; };
 		DAFD65BC7B287EE407CD78C8 /* TutorClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB611D1595BE27E8C760E17 /* TutorClient.swift */; };
 		F489337CD20880BCB3AB9FC7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A88F468F989F9FDE9ABB7C2 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -35,6 +36,7 @@
 		7EF3BF7264DC8D6B591E0AC6 /* SpeechListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechListener.swift; sourceTree = "<group>"; };
 		871457E8CB242624471556E4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B3B225F6395D121F22483799 /* CameraService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
+		B9D9773520F3CCD3766D0079 /* LessonStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonStore.swift; sourceTree = "<group>"; };
 		BBD985921EAE031D89376FDC /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		C52CFF59400E5783EBCCD770 /* WhiteboredApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboredApp.swift; sourceTree = "<group>"; };
 		D1102265F29FE12F84A30579 /* HotkeyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyMonitor.swift; sourceTree = "<group>"; };
@@ -69,6 +71,7 @@
 				871457E8CB242624471556E4 /* ContentView.swift */,
 				D1102265F29FE12F84A30579 /* HotkeyMonitor.swift */,
 				61678D18CFBB5564559AB828 /* Info.plist */,
+				B9D9773520F3CCD3766D0079 /* LessonStore.swift */,
 				DE178C130BAB8A7FD87B8E7B /* Session.swift */,
 				E479B65950B3D078EFB57550 /* Speaker.swift */,
 				7EF3BF7264DC8D6B591E0AC6 /* SpeechListener.swift */,
@@ -183,6 +186,7 @@
 				710D9CDF6C06C5355573D89C /* Config.swift in Sources */,
 				5A1BDCD32EB681D7577AB558 /* ContentView.swift in Sources */,
 				93FA6535448EB52D65D20C0C /* HotkeyMonitor.swift in Sources */,
+				BABCF3AE3CC918E2C01E0AAB /* LessonStore.swift in Sources */,
 				481C5C61C54716FF8E9E889D /* Session.swift in Sources */,
 				8187FA5194B11828E4C1DAB1 /* Speaker.swift in Sources */,
 				387FED2993050F4673B2ECAE /* SpeechListener.swift in Sources */,
