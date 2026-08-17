@@ -53,7 +53,7 @@ final class CameraService: NSObject, AVCapturePhotoCaptureDelegate {
             }
             waiting = cont
             let settings = AVCapturePhotoSettings()
-            settings.photoQualityPrioritization = .balanced
+            settings.photoQualityPrioritization = .speed
             photo.capturePhoto(with: settings, delegate: self)
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
                 self?.finish(nil)

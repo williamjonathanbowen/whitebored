@@ -3,7 +3,11 @@ import Foundation
 enum Config {
     static let model = "claude-sonnet-5"
     static let ttsModel = "gpt-4o-mini-tts"
-    static let ttsVoice = "coral"
+    static let ttsVoice = "ash"
+    static let ttsVoices = [
+        "alloy", "ash", "ballad", "coral", "echo", "fable",
+        "nova", "onyx", "sage", "shimmer", "verse", "marin", "cedar",
+    ]
 
     static var apiKey: String? { read("ANTHROPIC_API_KEY", defaults: "anthropicKey", file: "key") }
     static var openaiKey: String? { read("OPENAI_API_KEY", defaults: "openaiKey", file: "openai_key") }

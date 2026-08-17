@@ -15,8 +15,12 @@ final class SpeechListener {
     private var generation = 0
     private var hasTap = false
     private var allowed = false
+    private var paused = false
+    private var userMuted = false
+    private var ttsHold = false
 
     var isAllowed: Bool { allowed }
+    var isUserMuted: Bool { userMuted }
 
     func start() async {
         let mic = await AVCaptureDevice.requestAccess(for: .audio)
@@ -38,12 +42,52 @@ final class SpeechListener {
         return text
     }
 
+    func setUserMuted(_ muted: Bool) {
+        userMuted = muted
+        if muted {
+            halt()
+        } else if allowed, !ttsHold {
+            paused = false
+            begin()
+        }
+    }
+
+    func pause() {
+        guard allowed else { return }
+        ttsHold = true
+        halt()
+    }
+
+    func resume() {
+        guard allowed else { return }
+        ttsHold = false
+        paused = false
+        committed = ""
+        live = ""
+        onLive?("")
+        if !userMuted {
+            begin()
+        }
+    }
+
     func stop() {
+        ttsHold = false
+        paused = false
         generation += 1
         teardown()
     }
 
+    private func halt() {
+        paused = true
+        generation += 1
+        teardown()
+        committed = ""
+        live = ""
+        onLive?("")
+    }
+
     private func begin() {
+        guard !paused else { return }
         generation += 1
         let gen = generation
         teardown()
@@ -90,6 +134,7 @@ final class SpeechListener {
     }
 
     private func rollForward() {
+        guard !paused else { return }
         let piece = live.trimmingCharacters(in: .whitespacesAndNewlines)
         if !piece.isEmpty {
             committed = (committed + " " + piece)
