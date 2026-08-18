@@ -1,4 +1,4 @@
-.PHONY: generate build run
+.PHONY: generate build run dist
 
 generate:
 	xcodegen generate
@@ -8,3 +8,6 @@ build: generate
 
 run: build
 	open .build/Build/Products/Debug/Whitebored.app
+
+dist:
+	./scripts/package.sh
