@@ -2,23 +2,21 @@
   var NS = "http://www.w3.org/2000/svg";
   var TUTOR = "#2B4D8C";
   var STUDENT = "#111111";
+  var PAD = 14;
+  var COL_W = 400;
   var LEFT = 40;
   var RIGHT = 560;
-  var COL_W = 400;
-  var TOP = 92;
-  var BOTTOM = 668;
-  var PAD = 14;
 
   var measureCtx;
 
-  function ink(shape) {
-    return shape.ink === "student" ? STUDENT : TUTOR;
+  function inkOf(item) {
+    return item && item.ink === "student" ? STUDENT : TUTOR;
   }
 
-  function opts(shape, i) {
+  function opts(item, i) {
     return {
-      stroke: ink(shape),
-      strokeWidth: shape.weight === "thick" ? 5 : 2.2,
+      stroke: inkOf(item),
+      strokeWidth: 2.2,
       roughness: 0.55,
       bowing: 0.55,
       seed: i + 1,
@@ -113,24 +111,6 @@
     }));
   }
 
-  function circle(rc, svg, x, y, d, o, paint) {
-    var style = paint || filled(o);
-    if (rc) add(svg, rc.circle(x, y, d, style));
-    else add(svg, native("circle", {
-      cx: x, cy: y, r: d / 2,
-      fill: style.fill === "transparent" ? "none" : (style.fill || "#fff"),
-      stroke: o.stroke, "stroke-width": o.strokeWidth
-    }));
-  }
-
-  function ellipse(rc, svg, x, y, w, h, o) {
-    if (rc) add(svg, rc.ellipse(x, y, w, h, filled(o)));
-    else add(svg, native("ellipse", {
-      cx: x, cy: y, rx: w / 2, ry: h / 2,
-      fill: "#fff", stroke: o.stroke, "stroke-width": o.strokeWidth
-    }));
-  }
-
   function polygon(rc, svg, points, o) {
     if (rc) add(svg, rc.polygon(points, o));
     else add(svg, native("polygon", {
@@ -142,7 +122,7 @@
 
   function arrowHead(rc, svg, x1, y1, x2, y2, o) {
     var angle = Math.atan2(y2 - y1, x2 - x1);
-    var len = o.strokeWidth > 3 ? 22 : 16;
+    var len = 16;
     var p1 = [x2 - len * Math.cos(angle - 0.4), y2 - len * Math.sin(angle - 0.4)];
     var p2 = [x2 - len * Math.cos(angle + 0.4), y2 - len * Math.sin(angle + 0.4)];
     polygon(rc, svg, [[x2, y2], p1, p2], Object.assign({}, o, { fill: o.stroke, fillStyle: "solid" }));
@@ -150,196 +130,209 @@
 
   function arrow(rc, svg, x1, y1, x2, y2, o) {
     var angle = Math.atan2(y2 - y1, x2 - x1);
-    var back = o.strokeWidth > 3 ? 18 : 14;
+    var back = 14;
     line(rc, svg, x1, y1, x2 - back * Math.cos(angle), y2 - back * Math.sin(angle), o);
     arrowHead(rc, svg, x1, y1, x2, y2, o);
   }
 
-  function cloud(rc, svg, x, y, w, h, o) {
-    var d = [
-      "M", x + w * 0.25, y + h * 0.72,
-      "C", x + w * 0.02, y + h * 0.72, x + w * 0.02, y + h * 0.38, x + w * 0.28, y + h * 0.38,
-      "C", x + w * 0.32, y + h * 0.12, x + w * 0.62, y + h * 0.12, x + w * 0.68, y + h * 0.38,
-      "C", x + w * 0.98, y + h * 0.32, x + w * 0.98, y + h * 0.72, x + w * 0.72, y + h * 0.72,
-      "Z"
-    ].join(" ");
-    if (rc) add(svg, rc.path(d, filled(o)));
-    else add(svg, native("path", { d: d, fill: "#fff", stroke: o.stroke, "stroke-width": o.strokeWidth }));
-  }
-
-  function markX(rc, svg, x, y, r, o) {
-    line(rc, svg, x - r, y - r, x + r, y + r, o);
-    line(rc, svg, x + r, y - r, x - r, y + r, o);
-  }
-
-  function markPlus(rc, svg, x, y, r, o) {
-    line(rc, svg, x - r, y, x + r, y, o);
-    line(rc, svg, x, y - r, x, y + r, o);
-  }
-
-  function markCheck(rc, svg, x, y, r, o) {
-    line(rc, svg, x - r, y, x - r * 0.2, y + r * 0.55, o);
-    line(rc, svg, x - r * 0.2, y + r * 0.55, x + r, y - r * 0.55, o);
-  }
-
-  function colX(s) {
-    var x = +s.x || 0;
-    if (s.type === "box" || s.type === "cloud") x += (+s.w || COL_W) / 2;
-    return x < 500 ? LEFT : RIGHT;
-  }
-
-  function fitBox(s) {
-    s.x = colX(s);
-    s.w = COL_W;
-    var inner = COL_W - PAD * 2;
-    var titleSize = 20;
-    s._title = wrap(s.label, inner, titleSize);
-    s._body = s.sub ? wrap(s.sub, inner, 16) : [];
-    var h = PAD * 2 + s._title.length * titleSize * 1.25 + s._body.length * 16 * 1.25;
-    if (s._title.length && s._body.length) h += 6;
-    s.h = Math.max(44, h);
-    s._titleSize = titleSize;
-  }
-
-  function stack(items) {
-    items.sort(function (a, b) { return (+a.y || 0) - (+b.y || 0); });
-    var y = TOP;
-    var gap = 10;
-    var total = items.reduce(function (sum, s) { return sum + s.h; }, 0) + gap * Math.max(0, items.length - 1);
-    if (total > BOTTOM - TOP && items.length) {
-      var scale = (BOTTOM - TOP) / total;
-      items.forEach(function (s) { s.h *= scale; });
-      gap *= scale;
-    }
-    items.forEach(function (s) {
-      s.y = y;
-      y += s.h + gap;
-    });
-  }
-
-  function layout(shapes) {
+  function cardsFromShapes(shapes) {
     var left = [];
     var right = [];
-    var cross = false;
-    shapes.forEach(function (s) {
+    var title = "";
+    (shapes || []).forEach(function (s) {
       if (s.type === "box") {
-        fitBox(s);
-        (s.x === LEFT ? left : right).push(s);
-      } else if (s.type === "divider") {
-        s.x = 500;
-      } else if (s.type === "text") {
-        var y = +s.y || 0;
-        if (y < 80) {
-          s._role = "title";
-          s.x = 500;
-          s.y = 48;
-          s._size = 26;
-          s._lines = wrap(s.label, 880, 26).slice(0, 2);
-        } else if (y > 620) {
-          s._role = "footer";
-          s.x = 500;
-          s.y = 682;
-          s._size = 18;
-          s._lines = wrap(s.label, 880, 18).slice(0, 2);
-        } else {
-          s._role = "heading";
-          s.x = colX(s) + COL_W / 2;
-          s.y = 72;
-          s._size = 18;
-          s._lines = wrap(s.label, COL_W, 18).slice(0, 2);
-        }
-      } else if (s.type === "arrow" || s.type === "line") {
-        var a = Math.min(+s.x1 || 0, +s.x2 || 0);
-        var b = Math.max(+s.x1 || 0, +s.x2 || 0);
-        if (a < 460 && b > 540) {
-          s._skip = true;
-          cross = true;
-        }
-      } else if (s.type === "cloud") {
-        s.x = colX(s);
-        s.w = Math.min(+s.w || 280, COL_W);
-        s.h = Math.max(+s.h || 120, 90);
-        s._lines = wrap(s.label, s.w - 36, 18);
-      } else if (s.type === "circle" || s.type === "ellipse" || s.type === "diamond") {
-        var span = s.type === "circle" ? (+s.size || 80) : Math.min(+s.w || 120, COL_W);
-        s._lines = wrap(s.label, span * 0.7, 18);
+        if (!s.label && !s.sub) return;
+        var card = { label: s.label || "", sub: s.sub || "", ink: s.ink };
+        ((+s.x || 0) < 500 ? left : right).push(card);
+      } else if (s.type === "text" && s.label && !title) {
+        title = s.label;
       }
     });
-    stack(left);
-    stack(right);
-    if (cross) {
-      shapes.push({
-        type: "arrow",
-        x1: 468,
-        y1: 360,
-        x2: 532,
-        y2: 360,
-        ink: "tutor",
-        _bridge: true
-      });
+    return {
+      title: title,
+      left: left,
+      right: right,
+      layout: left.length && right.length ? "split" : "stack"
+    };
+  }
+
+  function sceneOf(raw) {
+    if (!raw) return { layout: "stack", left: [], right: [] };
+    if (raw.layout || raw.figure || raw.left || raw.right || (raw.title && !raw.shapes)) {
+      return {
+        title: raw.title || "",
+        footer: raw.footer || "",
+        layout: raw.layout || "stack",
+        figure: raw.figure || null,
+        left: raw.left || [],
+        right: raw.right || []
+      };
+    }
+    if (raw.shapes) return cardsFromShapes(raw.shapes);
+    return { layout: "stack", left: [], right: [] };
+  }
+
+  function measureCard(card, colW) {
+    var inner = colW - PAD * 2;
+    var title = wrap(card.label, inner, 20);
+    var body = card.sub ? wrap(card.sub, inner, 16) : [];
+    var h = PAD * 2 + title.length * 25 + body.length * 20;
+    if (title.length && body.length) h += 6;
+    return { title: title, body: body, h: Math.max(48, h) };
+  }
+
+  function placeCards(cards, colW, top, bottom) {
+    var measured = cards.map(function (c) { return measureCard(c, colW); });
+    var gap = 12;
+    var total = measured.reduce(function (sum, m) { return sum + m.h; }, 0)
+      + gap * Math.max(0, measured.length - 1);
+    var room = Math.max(48, bottom - top);
+    if (total > room && measured.length) {
+      var scale = room / total;
+      measured.forEach(function (m) { m.h *= scale; });
+      gap *= scale;
+    }
+    var y = top;
+    return measured.map(function (m, i) {
+      var placed = Object.assign({ y: y }, m, cards[i]);
+      y += m.h + gap;
+      return placed;
+    });
+  }
+
+  function drawCard(rc, svg, card, x, w, i) {
+    var o = opts(card, i + 4);
+    var color = inkOf(card);
+    rect(rc, svg, x, card.y, w, card.h, o);
+    var titleH = (card.title || []).length * 20 * 1.25;
+    var bodyH = (card.body || []).length * 16 * 1.25;
+    var block = titleH + (card.body && card.body.length ? 6 + bodyH : 0);
+    var cy = card.y + card.h / 2;
+    var titleY = card.body && card.body.length ? cy - block / 2 + titleH / 2 : cy;
+    labelBlock(svg, card.title, x + w / 2, titleY, color, 20);
+    if (card.body && card.body.length) {
+      labelBlock(svg, card.body, x + w / 2, titleY + titleH / 2 + 6 + bodyH / 2, color, 16);
     }
   }
 
-  window.renderBoard = function (scene) {
+  function drawTriangle(rc, svg, pane, fig, o, color) {
+    var size = Math.min(pane.w - 120, pane.h - 96, 380);
+    var left = pane.x + Math.max(44, (pane.w - size) / 2);
+    var top = pane.y + (pane.h - size) / 2 - 6;
+    var right = left + size;
+    var bottom = top + size;
+    var A = [left, top];
+    var C = [left, bottom];
+    var B = [right, bottom];
+    polygon(rc, svg, [A, C, B], filled(o));
+    var m = Math.min(28, size * 0.12);
+    line(rc, svg, left + m, bottom - m, left + m, bottom, o);
+    line(rc, svg, left, bottom - m, left + m, bottom - m, o);
+    labelLine(svg, left - 20, (top + bottom) / 2, fig.a || "a", color, 22, "end");
+    labelLine(svg, (left + right) / 2, bottom + 24, fig.b || "b", color, 22, "middle");
+    labelLine(svg, (left + right) / 2 + 18, (top + bottom) / 2 - 18, fig.c || "c", color, 22, "middle");
+  }
+
+  function drawEquation(svg, pane, fig, color) {
+    var lines = wrap(fig.label || "", pane.w - 40, 36);
+    labelBlock(svg, lines, pane.x + pane.w / 2, pane.y + pane.h / 2, color, 36);
+  }
+
+  function drawArrowRow(rc, svg, pane, fig, o, color) {
+    var items = (fig.items || []).slice(0, 4);
+    var n = items.length;
+    if (!n) return;
+    var gap = 18;
+    var arrowW = 28;
+    var inner = pane.w - 32;
+    var rawW = n === 1 ? inner : (inner - (n - 1) * (gap + arrowW)) / n;
+    var boxW = Math.min(180, Math.max(48, rawW));
+    var h = Math.min(88, pane.h - 40);
+    var rowW = n * boxW + (n - 1) * (gap + arrowW);
+    var x = pane.x + (pane.w - rowW) / 2;
+    var y = pane.y + (pane.h - h) / 2;
+    items.forEach(function (label, i) {
+      rect(rc, svg, x, y, boxW, h, o);
+      labelBlock(svg, wrap(label, boxW - 20, 18), x + boxW / 2, y + h / 2, color, 18);
+      if (i < n - 1) {
+        var x1 = x + boxW + 6;
+        var x2 = x + boxW + gap + arrowW - 6;
+        arrow(rc, svg, x1, y + h / 2, x2, y + h / 2, o);
+      }
+      x += boxW + gap + arrowW;
+    });
+  }
+
+  function drawFigure(rc, svg, pane, fig) {
+    if (!fig || !fig.type) return;
+    var o = opts(fig, 1);
+    var color = inkOf(fig);
+    if (fig.type === "right-triangle") drawTriangle(rc, svg, pane, fig, o, color);
+    else if (fig.type === "equation") drawEquation(svg, pane, fig, color);
+    else if (fig.type === "arrow-row") drawArrowRow(rc, svg, pane, fig, o, color);
+  }
+
+  function divider(svg, y1, y2, color) {
+    add(svg, native("line", {
+      x1: 500, y1: y1, x2: 500, y2: y2,
+      stroke: color, "stroke-width": 1.6, "stroke-dasharray": "7 10"
+    }));
+  }
+
+  window.renderBoard = function (raw) {
     var svg = document.getElementById("pic");
     if (!svg) return;
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     var rc = typeof rough !== "undefined" ? rough.svg(svg) : null;
-    var shapes = ((scene && scene.shapes) || []).map(function (s) {
-      return Object.assign({}, s);
-    });
-    layout(shapes);
-    shapes.forEach(function (s, i) {
-      if (s._skip) return;
-      var o = opts(s, i);
-      var color = ink(s);
-      var x = +s.x || 0, y = +s.y || 0;
-      var w = +s.w || 120, h = +s.h || 56;
-      var r = (+s.size || 64) / 2;
+    var scene = sceneOf(raw);
+    var left = scene.left || [];
+    var right = scene.right || [];
+    var fig = scene.figure;
+    var layout = scene.layout;
+    if (fig && fig.type) layout = "figure";
+    else if (left.length && right.length) layout = "split";
+    else layout = "stack";
 
-      if (s.type === "divider") {
-        add(svg, native("line", {
-          x1: 500, y1: 36, x2: 500, y2: 664,
-          stroke: color, "stroke-width": 1.6, "stroke-dasharray": "7 10"
-        }));
-      } else if (s.type === "box") {
-        rect(rc, svg, x, y, w, h, o);
-        var titleH = (s._title || []).length * 20 * 1.25;
-        var bodyH = (s._body || []).length * 16 * 1.25;
-        var block = titleH + (s._body && s._body.length ? 6 + bodyH : 0);
-        var cy = y + h / 2;
-        var titleY = s._body && s._body.length ? cy - block / 2 + titleH / 2 : cy;
-        labelBlock(svg, s._title, x + w / 2, titleY, color, s._titleSize || 20);
-        if (s._body && s._body.length) {
-          labelBlock(svg, s._body, x + w / 2, titleY + titleH / 2 + 6 + bodyH / 2, color, 16);
-        }
-      } else if (s.type === "circle") {
-        circle(rc, svg, x, y, +s.size || w || 80, o);
-        labelBlock(svg, s._lines, x, y, color, 18);
-      } else if (s.type === "ellipse") {
-        ellipse(rc, svg, x, y, w, h, o);
-        labelBlock(svg, s._lines, x, y, color, 18);
-      } else if (s.type === "diamond") {
-        polygon(rc, svg, [[x, y - h / 2], [x + w / 2, y], [x, y + h / 2], [x - w / 2, y]], filled(o));
-        labelBlock(svg, s._lines, x, y, color, 18);
-      } else if (s.type === "line") {
-        line(rc, svg, +s.x1 || 0, +s.y1 || 0, +s.x2 || 0, +s.y2 || 0, o);
-      } else if (s.type === "arrow") {
-        arrow(rc, svg, +s.x1 || 0, +s.y1 || 0, +s.x2 || 0, +s.y2 || 0, o);
-      } else if (s.type === "text") {
-        labelBlock(svg, s._lines || wrap(s.label, 400, 20), x, y, color, s._size || 20);
-      } else if (s.type === "x") {
-        markX(rc, svg, x, y, r, o);
-      } else if (s.type === "plus") {
-        markPlus(rc, svg, x, y, r, o);
-      } else if (s.type === "check") {
-        markCheck(rc, svg, x, y, r, o);
-      } else if (s.type === "dot") {
-        circle(rc, svg, x, y, +s.size || 16, o, Object.assign({}, o, { fill: color, fillStyle: "solid" }));
-      } else if (s.type === "cloud") {
-        cloud(rc, svg, x, y, w, h, o);
-        labelBlock(svg, s._lines, x + w / 2, y + h / 2, color, 18);
+    var titleLines = wrap(scene.title, 880, 26);
+    var top = titleLines.length ? 36 + titleLines.length * 32 + 10 : 48;
+    var bottom = scene.footer ? 640 : 668;
+    if (titleLines.length) {
+      labelBlock(svg, titleLines, 500, 28 + titleLines.length * 16, TUTOR, 26);
+    }
+    if (scene.footer) {
+      labelBlock(svg, wrap(scene.footer, 880, 18).slice(0, 2), 500, 682, TUTOR, 18);
+    }
+
+    if (layout === "figure") {
+      var cards = right.length ? right : left;
+      if (cards.length) {
+        drawFigure(rc, svg, { x: 40, y: top, w: 420, h: bottom - top }, fig);
+        divider(svg, top - 4, bottom, TUTOR);
+        placeCards(cards, COL_W, top, bottom).forEach(function (card, i) {
+          drawCard(rc, svg, card, RIGHT, COL_W, i);
+        });
+      } else {
+        drawFigure(rc, svg, { x: 80, y: top, w: 840, h: bottom - top }, fig);
       }
+      return;
+    }
+
+    if (layout === "split") {
+      divider(svg, top - 4, bottom, TUTOR);
+      placeCards(left, COL_W, top, bottom).forEach(function (card, i) {
+        drawCard(rc, svg, card, LEFT, COL_W, i);
+      });
+      placeCards(right, COL_W, top, bottom).forEach(function (card, i) {
+        drawCard(rc, svg, card, RIGHT, COL_W, i + left.length);
+      });
+      return;
+    }
+
+    var all = left.concat(right);
+    var stackW = 520;
+    var stackX = (1000 - stackW) / 2;
+    placeCards(all, stackW, top, bottom).forEach(function (card, i) {
+      drawCard(rc, svg, card, stackX, stackW, i);
     });
   };
 })();
