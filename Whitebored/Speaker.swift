@@ -25,6 +25,12 @@ final class Speaker: NSObject, AVAudioPlayerDelegate {
     private var clipProgress: ((Double) -> Void)?
     private var prefetch: Task<Data, Error>?
     private var generation = 0
+    var rate: Float = 1 {
+        didSet {
+            player?.enableRate = true
+            player?.rate = rate
+        }
+    }
 
     func say(_ text: String, voice: String, onProgress: ((Double) -> Void)? = nil) async throws {
         let parts = Self.sentences(from: text)
@@ -119,6 +125,8 @@ final class Speaker: NSObject, AVAudioPlayerDelegate {
             do {
                 let player = try AVAudioPlayer(contentsOf: url)
                 player.delegate = self
+                player.enableRate = true
+                player.rate = rate
                 player.volume = 1
                 player.prepareToPlay()
                 self.player = player

@@ -43,6 +43,7 @@ final class Session {
     var typeSize: Double
     var typeface: String
     var voice: String
+    var voiceSpeed: Double
     var learnt = ""
     var observation = ""
     var talkCount = 0
@@ -67,8 +68,11 @@ final class Session {
         typeface = UserDefaults.standard.string(forKey: "typeface") ?? "serif"
         let savedVoice = UserDefaults.standard.string(forKey: "ttsVoice") ?? Config.ttsVoice
         voice = Config.ttsVoices.contains(savedVoice) ? savedVoice : Config.ttsVoice
+        let savedSpeed = UserDefaults.standard.object(forKey: "ttsSpeed") as? Double ?? 1
+        voiceSpeed = Config.ttsSpeeds.contains(savedSpeed) ? savedSpeed : 1
         phase = Config.needsKeys ? .key : .goal
         lessons = LessonStore.load()
+        speaker.rate = Float(voiceSpeed)
         speech.onLive = { [weak self] text in
             self?.liveHeard = text
         }
@@ -159,6 +163,12 @@ final class Session {
         if cardIndex + 1 < cards.count { cardIndex += 1 }
     }
 
+    func goToCard(_ index: Int) {
+        followSpeech = false
+        guard cards.indices.contains(index) else { return }
+        cardIndex = index
+    }
+
     func toggleMute() {
         muted.toggle()
         speech.setUserMuted(muted)
@@ -204,6 +214,13 @@ final class Session {
         guard Config.ttsVoices.contains(name) else { return }
         voice = name
         UserDefaults.standard.set(name, forKey: "ttsVoice")
+    }
+
+    func setVoiceSpeed(_ speed: Double) {
+        guard Config.ttsSpeeds.contains(speed) else { return }
+        voiceSpeed = speed
+        UserDefaults.standard.set(speed, forKey: "ttsSpeed")
+        speaker.rate = Float(speed)
     }
 
     func uiFont(_ size: Double? = nil) -> Font {
@@ -414,6 +431,11 @@ final class Session {
             if TutorClient.hasInk(reply.svg) {
                 svg = reply.svg
             }
+            let board = reply.board
+            let spokenReply = reply.speak
+            let drawTask: Task<String, Never>? = board.isEmpty ? nil : Task {
+                (try? await TutorClient.draw(board: board, speak: spokenReply)) ?? ""
+            }
             if voiceTask == nil {
                 beginSpeaking(reply.speak)
             }
@@ -427,6 +449,13 @@ final class Session {
                 observation = reply.observe
             }
             persistCurrent()
+            if let drawTask {
+                let drawn = await drawTask.value
+                if TutorClient.hasInk(drawn) {
+                    svg = drawn
+                    persistCurrent()
+                }
+            }
             if let voiceTask {
                 do {
                     try await voiceTask.value
