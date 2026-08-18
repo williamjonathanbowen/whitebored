@@ -2,7 +2,7 @@
 
 import { saveEmail } from "@/lib/db";
 
-export async function startDownload(email: string) {
+export async function joinWaitlist(email: string) {
   const trimmed = email.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
     return { error: "need a real email" };
@@ -14,5 +14,5 @@ export async function startDownload(email: string) {
     return { error: "could not save that. try again." };
   }
 
-  return { url: process.env.DOWNLOAD_URL || "/whitebored.zip" };
+  return { ok: true };
 }

@@ -1,5 +1,6 @@
 import { copy } from "@/copy";
 import { DownloadForm } from "./download-form";
+import { LaunchVideo } from "./launch-video";
 
 export default function Home() {
   return (
@@ -18,15 +19,7 @@ export default function Home() {
         ))}
       </div>
       <DownloadForm />
-      {copy.video ? (
-        <video
-          src={copy.video}
-          className="mt-12 w-full"
-          controls
-          playsInline
-          preload="metadata"
-        />
-      ) : null}
+      {copy.video ? <LaunchVideo src={copy.video} /> : null}
     </main>
   );
 }

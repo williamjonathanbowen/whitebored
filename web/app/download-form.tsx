@@ -1,27 +1,30 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { startDownload } from "./actions";
+import { joinWaitlist } from "./actions";
 import { copy } from "@/copy";
 
 export function DownloadForm() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
     setBusy(true);
-    const result = await startDownload(email);
+    const result = await joinWaitlist(email);
     setBusy(false);
     if ("error" in result && result.error) {
       setError(result.error);
       return;
     }
-    if ("url" in result && result.url) {
-      window.location.href = result.url;
-    }
+    setDone(true);
+  }
+
+  if (done) {
+    return <p className="mt-8 text-[15px] leading-7">{copy.thanks}</p>;
   }
 
   return (
@@ -42,7 +45,7 @@ export function DownloadForm() {
           disabled={busy}
           className="rounded border border-[#ccc] bg-[#f2f2f2] px-4 py-2 text-sm lowercase disabled:opacity-50"
         >
-          {copy.download}
+          {copy.go}
         </button>
       </div>
       {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}

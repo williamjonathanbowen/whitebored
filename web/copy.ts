@@ -10,6 +10,8 @@ export const copy = {
     "all local. free. enjoy.",
   ],
   emailPlaceholder: "you@somewhere.com",
-  download: "download",
+  go: "Go",
+  thanks:
+    "you've been added to the waitlist. we'll send it to you asap. we'll send it in a download link.",
   video: "/launch.mp4",
 };
