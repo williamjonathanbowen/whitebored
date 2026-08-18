@@ -69,7 +69,7 @@ enum TutorClient {
                                 ],
                                 "board": [
                                     "type": "string",
-                                    "description": "Picture recipe for the whiteboard. Regions, labels, arrows. No SVG."
+                                    "description": "Picture recipe: title, layout stack/split/figure, optional figure, card labels. No SVG or coordinates."
                                 ],
                                 "criteria": [
                                     "type": "array",
@@ -113,52 +113,66 @@ enum TutorClient {
         let raw = try await request(
             payload: [
                 "model": Config.model,
-                "max_tokens": 8192,
+                "max_tokens": 2048,
                 "stream": true,
                 "thinking": ["type": "disabled"],
                 "tool_choice": ["type": "tool", "name": "tutor_board"],
                 "tools": [
                     [
                         "name": "tutor_board",
-                        "description": "Draw the whiteboard as named shapes. Never SVG.",
+                        "description": "Fill whiteboard slots. Never SVG or coordinates.",
                         "input_schema": [
                             "type": "object",
                             "properties": [
-                                "shapes": [
+                                "title": ["type": "string"],
+                                "layout": [
+                                    "type": "string",
+                                    "enum": ["stack", "split", "figure"]
+                                ],
+                                "figure": [
+                                    "type": "object",
+                                    "properties": [
+                                        "type": [
+                                            "type": "string",
+                                            "enum": ["right-triangle", "equation", "arrow-row"]
+                                        ],
+                                        "a": ["type": "string"],
+                                        "b": ["type": "string"],
+                                        "c": ["type": "string"],
+                                        "label": ["type": "string"],
+                                        "items": [
+                                            "type": "array",
+                                            "items": ["type": "string"]
+                                        ],
+                                        "ink": ["type": "string", "enum": ["tutor", "student"]]
+                                    ],
+                                    "required": ["type"]
+                                ],
+                                "left": [
                                     "type": "array",
-                                    "description": "Named shapes. Never SVG or paths.",
                                     "items": [
                                         "type": "object",
                                         "properties": [
-                                            "type": [
-                                                "type": "string",
-                                                "enum": [
-                                                    "box", "circle", "ellipse", "diamond",
-                                                    "line", "arrow", "text",
-                                                    "x", "plus", "check", "dot",
-                                                    "cloud", "divider"
-                                                ]
-                                            ],
-                                            "x": ["type": "number"],
-                                            "y": ["type": "number"],
-                                            "w": ["type": "number"],
-                                            "h": ["type": "number"],
-                                            "x1": ["type": "number"],
-                                            "y1": ["type": "number"],
-                                            "x2": ["type": "number"],
-                                            "y2": ["type": "number"],
-                                            "size": ["type": "number"],
                                             "label": ["type": "string"],
                                             "sub": ["type": "string"],
-                                            "align": ["type": "string", "enum": ["start", "middle", "end"]],
-                                            "weight": ["type": "string", "enum": ["thin", "thick"]],
                                             "ink": ["type": "string", "enum": ["tutor", "student"]]
-                                        ],
-                                        "required": ["type"]
+                                        ]
                                     ]
-                                ]
+                                ],
+                                "right": [
+                                    "type": "array",
+                                    "items": [
+                                        "type": "object",
+                                        "properties": [
+                                            "label": ["type": "string"],
+                                            "sub": ["type": "string"],
+                                            "ink": ["type": "string", "enum": ["tutor", "student"]]
+                                        ]
+                                    ]
+                                ],
+                                "footer": ["type": "string"]
                             ],
-                            "required": ["shapes"]
+                            "required": ["layout"]
                         ]
                     ]
                 ],
@@ -364,19 +378,134 @@ enum TutorClient {
         return sanitizeSVG(raw)
     }
 
-    private static let shapeTypes: Set<String> = [
-        "box", "circle", "ellipse", "diamond",
-        "line", "arrow", "text",
-        "x", "plus", "check", "dot",
-        "cloud", "divider"
-    ]
-
     static func sanitizeScene(_ raw: String) -> String {
-        let shapes = shapeList(from: raw).compactMap(cleanShape)
-        guard !shapes.isEmpty,
-              let data = try? JSONSerialization.data(withJSONObject: ["shapes": shapes]),
+        let cleaned = stripFences(raw)
+        let obj = jsonObject(cleaned)
+        let slots: [String: Any]
+        if let obj, isSlotScene(obj) {
+            slots = cleanSlots(obj)
+        } else {
+            slots = slotsFromShapes(shapeList(from: cleaned))
+        }
+        let hasFigure = slots["figure"] != nil
+        let left = slots["left"] as? [[String: Any]] ?? []
+        let right = slots["right"] as? [[String: Any]] ?? []
+        let titled = !(slots["title"] as? String ?? "").isEmpty
+        let footed = !(slots["footer"] as? String ?? "").isEmpty
+        guard hasFigure || !left.isEmpty || !right.isEmpty || titled || footed else { return "" }
+        guard let data = try? JSONSerialization.data(withJSONObject: slots),
               let s = String(data: data, encoding: .utf8) else { return "" }
         return s
+    }
+
+    private static func isSlotScene(_ obj: [String: Any]) -> Bool {
+        if obj["layout"] is String { return true }
+        if obj["left"] is [[String: Any]] || obj["right"] is [[String: Any]] { return true }
+        if obj["figure"] is [String: Any] { return true }
+        if obj["shapes"] == nil, obj["title"] is String { return true }
+        return false
+    }
+
+    private static func cleanSlots(_ obj: [String: Any]) -> [String: Any] {
+        let figure = cleanFigure(obj["figure"] as? [String: Any])
+        var left = cleanCards(obj["left"])
+        var right = cleanCards(obj["right"])
+        let layout: String
+        if figure != nil {
+            layout = "figure"
+            right = Array((left + right).prefix(4))
+            left = []
+        } else if !left.isEmpty && !right.isEmpty {
+            layout = "split"
+        } else {
+            layout = "stack"
+            left = Array((left + right).prefix(4))
+            right = []
+        }
+        var out: [String: Any] = [
+            "layout": layout,
+            "left": left,
+            "right": right
+        ]
+        if let title = clipped(obj["title"] as? String, 48) { out["title"] = title }
+        if let footer = clipped(obj["footer"] as? String, 48) { out["footer"] = footer }
+        if let figure { out["figure"] = figure }
+        return out
+    }
+
+    private static func cleanFigure(_ raw: [String: Any]?) -> [String: Any]? {
+        guard let raw,
+              let type = (raw["type"] as? String)?.lowercased() else { return nil }
+        var out: [String: Any] = [
+            "type": type,
+            "ink": (raw["ink"] as? String)?.lowercased() == "student" ? "student" : "tutor"
+        ]
+        switch type {
+        case "right-triangle", "triangle":
+            out["type"] = "right-triangle"
+            out["a"] = clipped(raw["a"] as? String, 12) ?? "a"
+            out["b"] = clipped(raw["b"] as? String, 12) ?? "b"
+            out["c"] = clipped(raw["c"] as? String, 12) ?? "c"
+        case "equation":
+            guard let label = clipped(raw["label"] as? String, 48) else { return nil }
+            out["label"] = label
+        case "arrow-row":
+            let items = (raw["items"] as? [String] ?? []).compactMap { clipped($0, 24) }
+            let clippedItems = Array(items.prefix(4))
+            guard clippedItems.count >= 2 else { return nil }
+            out["items"] = clippedItems
+        default:
+            return nil
+        }
+        return out
+    }
+
+    private static func cleanCards(_ raw: Any?) -> [[String: Any]] {
+        let list = raw as? [[String: Any]] ?? []
+        return Array(list.compactMap(cleanCard).prefix(4))
+    }
+
+    private static func cleanCard(_ raw: [String: Any]) -> [String: Any]? {
+        let label = clipped(raw["label"] as? String, 48)
+        let sub = clipped(raw["sub"] as? String, 48)
+        guard label != nil || sub != nil else { return nil }
+        var out: [String: Any] = [
+            "ink": (raw["ink"] as? String)?.lowercased() == "student" ? "student" : "tutor"
+        ]
+        if let label { out["label"] = label }
+        if let sub { out["sub"] = sub }
+        return out
+    }
+
+    private static func clipped(_ raw: String?, _ max: Int) -> String? {
+        guard let raw else { return nil }
+        let t = raw.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !t.isEmpty else { return nil }
+        return String(t.prefix(max))
+    }
+
+    private static func slotsFromShapes(_ shapes: [[String: Any]]) -> [String: Any] {
+        var title: String?
+        var left: [[String: Any]] = []
+        var right: [[String: Any]] = []
+        for raw in shapes {
+            let type = (raw["type"] as? String)?.lowercased() ?? ""
+            if type == "box" {
+                guard let card = cleanCard(raw) else { continue }
+                let x = (raw["x"] as? NSNumber)?.doubleValue
+                    ?? (raw["x"] as? Double)
+                    ?? Double(raw["x"] as? Int ?? 0)
+                if x < 500 { left.append(card) } else { right.append(card) }
+            } else if type == "text", title == nil {
+                title = clipped(raw["label"] as? String, 48)
+            }
+        }
+        var obj: [String: Any] = [:]
+        if let title { obj["title"] = title }
+        obj["left"] = left
+        obj["right"] = right
+        return cleanSlots(obj)
     }
 
     private static func shapeList(from raw: String) -> [[String: Any]] {
@@ -398,110 +527,6 @@ enum TutorClient {
             return list
         }
         return []
-    }
-
-    private static func cleanShape(_ raw: [String: Any]) -> [String: Any]? {
-        guard let type = (raw["type"] as? String)?.lowercased(), shapeTypes.contains(type) else {
-            return nil
-        }
-        var out: [String: Any] = [
-            "type": type,
-            "ink": (raw["ink"] as? String)?.lowercased() == "student" ? "student" : "tutor"
-        ]
-        if (raw["weight"] as? String)?.lowercased() == "thick" {
-            out["weight"] = "thick"
-        }
-        func num(_ key: String) -> Double? {
-            if let v = raw[key] as? Double { return v }
-            if let v = raw[key] as? Int { return Double(v) }
-            if let v = raw[key] as? NSNumber { return v.doubleValue }
-            if let v = raw[key] as? String { return Double(v.trimmingCharacters(in: .whitespaces)) }
-            return nil
-        }
-        func clamp(_ key: String, lo: Double, hi: Double) -> Double? {
-            guard let v = num(key) else { return nil }
-            return Swift.min(hi, Swift.max(lo, v))
-        }
-        func words(_ key: String) -> String? {
-            guard let s = raw[key] as? String else { return nil }
-            let t = s.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !t.isEmpty else { return nil }
-            return String(t.prefix(60))
-        }
-        switch type {
-        case "box":
-            guard let x = clamp("x", lo: 0, hi: 1000),
-                  let y = clamp("y", lo: 0, hi: 700),
-                  let w = clamp("w", lo: 8, hi: 980),
-                  let h = clamp("h", lo: 8, hi: 680) else { return nil }
-            out["x"] = x
-            out["y"] = y
-            out["w"] = w
-            out["h"] = h
-            if let label = words("label") { out["label"] = label }
-            if let sub = words("sub") { out["sub"] = sub }
-        case "circle", "dot":
-            guard let x = clamp("x", lo: 0, hi: 1000),
-                  let y = clamp("y", lo: 0, hi: 700) else { return nil }
-            out["x"] = x
-            out["y"] = y
-            out["size"] = clamp("size", lo: 8, hi: 400) ?? clamp("w", lo: 8, hi: 400) ?? (type == "dot" ? 16 : 80)
-            if type == "circle", let label = words("label") { out["label"] = label }
-        case "ellipse", "diamond":
-            guard let x = clamp("x", lo: 0, hi: 1000),
-                  let y = clamp("y", lo: 0, hi: 700),
-                  let w = clamp("w", lo: 12, hi: 980) ?? clamp("size", lo: 12, hi: 400) else { return nil }
-            let h = clamp("h", lo: 12, hi: 680) ?? w
-            out["x"] = x
-            out["y"] = y
-            out["w"] = w
-            out["h"] = h
-            if let label = words("label") { out["label"] = label }
-        case "line", "arrow":
-            guard let x1 = clamp("x1", lo: 0, hi: 1000),
-                  let y1 = clamp("y1", lo: 0, hi: 700),
-                  let x2 = clamp("x2", lo: 0, hi: 1000),
-                  let y2 = clamp("y2", lo: 0, hi: 700) else { return nil }
-            out["x1"] = x1
-            out["y1"] = y1
-            out["x2"] = x2
-            out["y2"] = y2
-            if let label = words("label") { out["label"] = label }
-        case "text":
-            guard let x = clamp("x", lo: 0, hi: 1000),
-                  let y = clamp("y", lo: 0, hi: 700),
-                  let label = words("label") else { return nil }
-            out["x"] = x
-            out["y"] = y
-            out["label"] = label
-            if let size = clamp("size", lo: 16, hi: 64) { out["size"] = size }
-            if let align = raw["align"] as? String, ["start", "middle", "end"].contains(align) {
-                out["align"] = align
-            }
-        case "x", "plus", "check":
-            guard let x = clamp("x", lo: 0, hi: 1000),
-                  let y = clamp("y", lo: 0, hi: 700) else { return nil }
-            out["x"] = x
-            out["y"] = y
-            out["size"] = clamp("size", lo: 16, hi: 240) ?? 64
-        case "cloud":
-            guard let x = clamp("x", lo: 0, hi: 1000),
-                  let y = clamp("y", lo: 0, hi: 700),
-                  let w = clamp("w", lo: 40, hi: 980),
-                  let h = clamp("h", lo: 40, hi: 680) else { return nil }
-            out["x"] = x
-            out["y"] = y
-            out["w"] = w
-            out["h"] = h
-            if let label = words("label") { out["label"] = label }
-        case "divider":
-            guard let x = clamp("x", lo: 40, hi: 960) else { return nil }
-            out["x"] = x
-        default:
-            return nil
-        }
-        return out
     }
 
     static func sanitizeSVG(_ raw: String) -> String {
