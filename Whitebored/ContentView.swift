@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 import AVFoundation
 import WebKit
 
@@ -119,7 +120,7 @@ struct GoalView: View {
             .onSubmit {
                 Task { await session.start() }
             }
-            Text("one line. be specific.")
+            Text("one line.")
                 .font(.system(size: 13))
                 .foregroundStyle(.black.opacity(0.3))
             Spacer()
@@ -129,6 +130,7 @@ struct GoalView: View {
             HStack(alignment: .center, spacing: 2) {
                 HistoryToggle()
                 SettingsToggle()
+                FullscreenToggle()
             }
             .padding(10)
         }
@@ -136,85 +138,118 @@ struct GoalView: View {
     }
 }
 
+private enum Study {
+    static let ink2 = Color(red: 29 / 255, green: 33 / 255, blue: 38 / 255)
+    static let muted = Color(red: 106 / 255, green: 114 / 255, blue: 128 / 255)
+    static let label = Color(red: 169 / 255, green: 174 / 255, blue: 182 / 255)
+    static let placeholder = Color(red: 182 / 255, green: 187 / 255, blue: 194 / 255)
+    static let track = Color(red: 223 / 255, green: 227 / 255, blue: 232 / 255)
+    static let hairline = Color(red: 237 / 255, green: 239 / 255, blue: 242 / 255)
+    static let hairline2 = Color(red: 228 / 255, green: 231 / 255, blue: 236 / 255)
+    static let fill = Color(red: 243 / 255, green: 245 / 255, blue: 247 / 255)
+    static let accent = Color(red: 43 / 255, green: 82 / 255, blue: 168 / 255)
+    static let record = Color(red: 255 / 255, green: 95 / 255, blue: 87 / 255)
+    static let prev = Color(red: 154 / 255, green: 160 / 255, blue: 168 / 255)
+    static let next = Color(red: 59 / 255, green: 64 / 255, blue: 72 / 255)
+}
+
 struct SessionView: View {
     @Environment(Session.self) private var session
     @State private var titleHover = false
 
     var body: some View {
-        ZStack(alignment: .top) {
-            VStack(spacing: 0) {
-                GeometryReader { geo in
-                    HStack(alignment: .center, spacing: 20) {
-                        if !session.cards.isEmpty {
-                            FlashcardsView()
-                                .frame(width: min(420, max(300, geo.size.width * 0.32)))
-                        }
-                        WhiteboardView(svg: session.svg)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-                }
-                .padding(.horizontal, 28)
-                .padding(.top, 28)
-                .padding(.bottom, 8)
-
-                if !displayHeard.isEmpty {
-                    Text(displayHeard)
-                        .font(session.uiFont())
-                        .foregroundStyle(.black.opacity(0.45))
-                        .frame(maxWidth: 720, alignment: .leading)
-                        .lineLimit(6)
-                        .textSelection(.enabled)
-                        .padding(.horizontal, 40)
-                        .padding(.top, 8)
-                        .padding(.bottom, 4)
-                }
-
-                HStack(alignment: .center, spacing: 16) {
-                    MicCamera(session: session)
-
-                    TalkBox()
-                        .frame(maxWidth: .infinity)
-
-                    PowerTimer()
-                        .frame(width: 132, height: 88, alignment: .center)
-                }
-                .padding(.horizontal, 28)
-                .padding(.bottom, 22)
-                .padding(.top, 8)
-            }
-
+        VStack(spacing: 0) {
             HStack {
                 Color.clear
-                    .frame(width: 116, height: 28)
+                    .frame(width: 116, height: 22)
                 Spacer()
                 Text(session.goal)
                     .font(session.uiFont(13))
-                    .foregroundStyle(.black.opacity(0.4))
+                    .foregroundStyle(Study.label)
                     .lineLimit(1)
                     .opacity(titleHover ? 1 : 0)
-                    .animation(.easeInOut(duration: 0.2), value: titleHover)
+                    .animation(.easeInOut(duration: 0.12), value: titleHover)
                 Spacer()
-                HStack(alignment: .center, spacing: 2) {
+                HStack(spacing: 18) {
                     NewLessonButton()
                     HistoryToggle()
                     SettingsToggle()
+                    FullscreenToggle()
                 }
+                .foregroundStyle(Study.placeholder)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.top, 8)
+            .padding(.top, 16)
             .padding(.horizontal, 20)
             .contentShape(Rectangle())
             .onHover { titleHover = $0 }
 
-            if session.muted {
-                Text("you're muted")
-                    .font(.system(size: 13, weight: .medium, design: .serif))
-                    .foregroundStyle(Color.red)
-                    .padding(.top, 32)
+            HStack(spacing: 0) {
+                FlashcardsView()
+                    .frame(width: 300)
+                    .overlay(alignment: .trailing) {
+                        Rectangle()
+                            .fill(Study.hairline)
+                            .frame(width: 1)
+                    }
+                WhiteboardView(svg: session.svg)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.horizontal, 56)
+                    .padding(.vertical, 40)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            SessionFooter()
         }
         .background(Color.white)
         .focusable()
+    }
+}
+
+struct SessionFooter: View {
+    @Environment(Session.self) private var session
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 16) {
+            CameraPeek(session: session.camera.session)
+                .frame(width: 74, height: 50)
+                .background(Study.track)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 6) {
+                if !displayHeard.isEmpty {
+                    Text(displayHeard)
+                        .font(.system(size: 14))
+                        .foregroundStyle(Study.muted)
+                        .lineLimit(2)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Study.fill)
+                        .clipShape(
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: 12,
+                                bottomLeadingRadius: 4,
+                                bottomTrailingRadius: 12,
+                                topTrailingRadius: 12,
+                                style: .continuous
+                            )
+                        )
+                }
+                TalkBox()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            HStack(spacing: 16) {
+                PowerTimer()
+                MicButton()
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(Study.hairline)
+                .frame(height: 1)
+        }
     }
 
     private var displayHeard: String {
@@ -223,42 +258,27 @@ struct SessionView: View {
     }
 }
 
-struct MicCamera: View {
-    @Bindable var session: Session
+struct MicButton: View {
+    @Environment(Session.self) private var session
+    @State private var hover = false
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            CameraPeek(session: session.camera.session)
-                .frame(width: 132, height: 88)
-                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .stroke(session.muted ? Color.red : Color.black.opacity(0.08), lineWidth: session.muted ? 2 : 1)
+        Button {
+            session.toggleMute()
+        } label: {
+            Image(systemName: session.muted ? "mic.slash.fill" : "mic.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 34, height: 34)
+                .background(
+                    Circle().fill(session.muted ? Study.record : Study.accent)
+                        .brightness(hover ? -0.04 : 0)
                 )
-                .overlay {
-                    if session.muted {
-                        Color.red.opacity(0.48)
-                        Text("MUTED")
-                            .font(.system(size: 15, weight: .semibold, design: .serif))
-                            .foregroundStyle(.white)
-                    }
-                }
-
-            Button {
-                session.toggleMute()
-            } label: {
-                Image(systemName: session.muted ? "mic.slash.fill" : "mic.fill")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(session.muted ? .white : .black.opacity(0.55))
-                    .frame(width: 26, height: 26)
-                    .background(
-                        Circle().fill(session.muted ? Color.red : Color.white.opacity(0.92))
-                    )
-            }
-            .buttonStyle(.plain)
-            .help(session.muted ? "you're muted" : "mute mic")
-            .padding(6)
         }
+        .buttonStyle(.plain)
+        .onHover { hover = $0 }
+        .animation(.easeInOut(duration: 0.12), value: hover)
+        .help(session.muted ? "you're muted" : "mute mic")
     }
 }
 
@@ -270,8 +290,8 @@ struct PowerTimer: View {
             session.togglePowerTimer()
         } label: {
             Text(session.timerLabel)
-                .font(.system(size: 15, weight: .regular, design: .monospaced))
-                .foregroundStyle(.black.opacity(session.timerRunning || session.timerRemaining == 0 ? 0.55 : 0.28))
+                .font(.system(size: 13, weight: .regular, design: .monospaced))
+                .foregroundStyle(Study.placeholder)
         }
         .buttonStyle(.plain)
         .help(session.timerRunning ? "stop timer" : "start a 15 minute session")
@@ -285,8 +305,8 @@ struct ChromeIcon: View {
         Image(systemName: name)
             .resizable()
             .scaledToFit()
-            .frame(width: 15, height: 15)
-            .frame(width: 28, height: 28)
+            .frame(width: 17, height: 17)
+            .frame(width: 22, height: 22)
     }
 }
 
@@ -298,7 +318,7 @@ struct HistoryToggle: View {
             session.toggleHistory()
         } label: {
             ChromeIcon(name: "clock")
-                .foregroundStyle(.black.opacity(session.showHistory ? 0.7 : 0.5))
+                .foregroundStyle(session.showHistory ? Study.ink2 : Study.placeholder)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -314,11 +334,38 @@ struct SettingsToggle: View {
             session.toggleSettings()
         } label: {
             ChromeIcon(name: "gearshape")
-                .foregroundStyle(.black.opacity(session.showSettings ? 0.7 : 0.5))
+                .foregroundStyle(session.showSettings ? Study.ink2 : Study.placeholder)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .help("settings")
+    }
+}
+
+struct FullscreenToggle: View {
+    @State private var fullscreen = false
+
+    var body: some View {
+        Button {
+            NSApp.keyWindow?.toggleFullScreen(nil)
+        } label: {
+            ChromeIcon(name: fullscreen ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                .foregroundStyle(Study.placeholder)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(fullscreen ? "exit fullscreen" : "fullscreen")
+        .onAppear { sync() }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didEnterFullScreenNotification)) { _ in
+            fullscreen = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didExitFullScreenNotification)) { _ in
+            fullscreen = false
+        }
+    }
+
+    private func sync() {
+        fullscreen = NSApp.keyWindow?.styleMask.contains(.fullScreen) == true
     }
 }
 
@@ -330,7 +377,7 @@ struct NewLessonButton: View {
             session.beginNew()
         } label: {
             ChromeIcon(name: "plus")
-                .foregroundStyle(.black.opacity(0.45))
+                .foregroundStyle(Study.placeholder)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -473,6 +520,16 @@ struct SettingsSidebar: View {
                             .foregroundStyle(.black.opacity(session.typeface == name ? 0.7 : 0.32))
                         }
                     }
+                    HStack(spacing: 12) {
+                        ForEach(Config.ttsSpeeds, id: \.self) { speed in
+                            Button(speed == floor(speed) ? "\(Int(speed))x" : String(format: "%gx", speed)) {
+                                session.setVoiceSpeed(speed)
+                            }
+                            .buttonStyle(.plain)
+                            .font(session.uiFont(13))
+                            .foregroundStyle(.black.opacity(session.voiceSpeed == speed ? 0.7 : 0.32))
+                        }
+                    }
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 52), spacing: 8, alignment: .leading)], alignment: .leading, spacing: 8) {
                         ForEach(Config.ttsVoices, id: \.self) { name in
                             Button(name) {
@@ -503,102 +560,99 @@ struct FlashcardsView: View {
     @Environment(Session.self) private var session
 
     var body: some View {
-        GeometryReader { geo in
-            let width = max(geo.size.width - 8, 120)
-            let height = min(max(geo.size.height - 36, 120), width * 0.78)
-            VStack(spacing: 8) {
-                ZStack {
-                    ForEach(Array(stride(from: behindCount, through: 1, by: -1)), id: \.self) { depth in
-                        cardFace(text: nil, width: width, height: height)
-                            .offset(stackOffset(depth))
-                            .rotationEffect(.degrees(stackAngle(depth)))
+        VStack(alignment: .leading, spacing: 0) {
+            Spacer(minLength: 0)
+            Group {
+                if session.cards.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        RoundedRectangle(cornerRadius: 2, style: .continuous)
+                            .fill(Study.fill)
+                            .frame(width: 86, height: 11)
+                        RoundedRectangle(cornerRadius: 4, style: .continuous)
+                            .fill(Study.fill)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 72)
                     }
-                    cardFace(text: cardText, width: width, height: height)
-                        .onTapGesture { session.nextCard() }
-
-                    HStack {
-                        Button {
-                            session.prevCard()
-                        } label: {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundStyle(.black.opacity(session.cardIndex == 0 ? 0.12 : 0.4))
-                                .frame(width: 28, height: 44)
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(session.cardIndex == 0)
-
-                        Spacer()
-
-                        Button {
-                            session.nextCard()
-                        } label: {
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundStyle(.black.opacity(atEnd ? 0.12 : 0.4))
-                                .frame(width: 28, height: 44)
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(atEnd)
+                } else {
+                    VStack(alignment: .leading, spacing: 18) {
+                        Text("Step \(session.cardIndex + 1) of \(session.cards.count)")
+                            .font(.system(size: 11))
+                            .tracking(1.76)
+                            .textCase(.uppercase)
+                            .foregroundStyle(Study.label)
+                        Text(cardText)
+                            .font(session.uiFont(21))
+                            .foregroundStyle(Study.ink2)
+                            .lineSpacing(6)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    .padding(.horizontal, 4)
                 }
-                .frame(width: width, height: height)
-                .animation(.easeInOut(duration: 0.22), value: session.cardIndex)
-
-                Text("\(session.cardIndex + 1) / \(session.cards.count)")
-                    .font(session.uiFont(11))
-                    .foregroundStyle(.black.opacity(0.28))
             }
-            .frame(width: geo.size.width, height: geo.size.height, alignment: .center)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer(minLength: 0)
+            HStack(spacing: 6) {
+                ForEach(session.cards.indices, id: \.self) { index in
+                    Button {
+                        session.goToCard(index)
+                    } label: {
+                        Capsule()
+                            .fill(index == session.cardIndex ? Study.accent : Study.track)
+                            .frame(height: 3)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 18, alignment: .center)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .help("step \(index + 1)")
+                }
+            }
+            .frame(height: 18)
+            .padding(.top, 6)
+            HStack(spacing: 10) {
+                CardNavButton(label: "‹", enabled: session.cardIndex > 0, active: false) {
+                    session.prevCard()
+                }
+                CardNavButton(label: "›", enabled: !atEnd && !session.cards.isEmpty, active: true) {
+                    session.nextCard()
+                }
+            }
+            .padding(.top, 14)
         }
+        .padding(.horizontal, 28)
+        .padding(.vertical, 34)
+        .animation(.easeInOut(duration: 0.18), value: session.cardIndex)
     }
 
     private var atEnd: Bool {
-        session.cardIndex >= session.cards.count - 1
-    }
-
-    private var behindCount: Int {
-        min(3, max(0, session.cards.count - session.cardIndex - 1))
+        session.cards.isEmpty || session.cardIndex >= session.cards.count - 1
     }
 
     private var cardText: String {
         guard session.cards.indices.contains(session.cardIndex) else { return "" }
         return session.cards[session.cardIndex]
     }
+}
 
-    private func cardFace(text: String?, width: CGFloat, height: CGFloat) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color.white)
-                .shadow(color: .black.opacity(0.10), radius: 8, y: 3)
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(Color.black.opacity(0.08), lineWidth: 1)
-            if let text {
-                Text(text)
-                    .font(session.uiFont())
-                    .foregroundStyle(.black.opacity(0.82))
-                    .multilineTextAlignment(.center)
-                    .padding(22)
-            }
-        }
-        .frame(width: width - 18, height: height - 22)
-    }
+struct CardNavButton: View {
+    let label: String
+    let enabled: Bool
+    let active: Bool
+    let action: () -> Void
+    @State private var hover = false
 
-    private func stackOffset(_ depth: Int) -> CGSize {
-        switch depth {
-        case 1: CGSize(width: 7, height: 7)
-        case 2: CGSize(width: -6, height: 13)
-        default: CGSize(width: 9, height: 19)
+    var body: some View {
+        Button(action: action) {
+            Text(label)
+                .font(.system(size: 14))
+                .foregroundStyle(enabled ? (active ? Study.next : Study.prev) : Study.prev.opacity(0.5))
+                .frame(width: 34, height: 34)
+                .background(Circle().fill(hover && enabled ? Study.fill : Color.clear))
+                .overlay(Circle().stroke(Study.hairline2, lineWidth: 1))
         }
-    }
-
-    private func stackAngle(_ depth: Int) -> Double {
-        switch depth {
-        case 1: 2.8
-        case 2: -3.6
-        default: 4.4
-        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
+        .onHover { hover = $0 }
+        .animation(.easeInOut(duration: 0.12), value: hover)
     }
 }
 
@@ -607,33 +661,37 @@ struct TalkBox: View {
 
     var body: some View {
         @Bindable var session = session
-        ZStack {
+        ZStack(alignment: .leading) {
             if session.typedDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-               session.status != .thinking {
-                Text("type or talk, enter when you're ready")
-                    .font(session.uiFont(13))
-                    .foregroundStyle(.black.opacity(0.32))
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+               session.status != .thinking,
+               blockedMessage == nil {
+                Text("Type or talk…")
+                    .font(.system(size: 15))
+                    .foregroundStyle(Study.placeholder)
                     .allowsHitTesting(false)
             }
-            TalkEditor(text: $session.typedDraft, font: session.nsFont()) {
+            TalkEditor(text: $session.typedDraft, font: session.nsFont(15)) {
                 Task { await session.send() }
             }
+            if let blockedMessage {
+                Text(blockedMessage)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Study.muted)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: 22, maxHeight: 44, alignment: .leading)
+        .overlay {
             if session.status == .thinking {
                 ProgressView()
                     .progressViewStyle(.circular)
-                    .controlSize(.regular)
-                    .scaleEffect(1.15)
-            } else if case .blocked(let message) = session.status {
-                Text(message)
-                    .font(.system(size: 13, weight: .regular, design: .serif))
-                    .foregroundStyle(.black.opacity(0.45))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 12)
+                    .controlSize(.small)
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 88, maxHeight: 88)
+    }
+
+    private var blockedMessage: String? {
+        if case .blocked(let message) = session.status { return message }
+        return nil
     }
 }
 
@@ -665,7 +723,7 @@ struct TalkEditor: NSViewRepresentable {
         view.drawsBackground = false
         view.appearance = NSAppearance(named: .aqua)
         view.typingAttributes = Self.typing(font)
-        view.textContainerInset = NSSize(width: 4, height: 6)
+        view.textContainerInset = NSSize(width: 0, height: 1)
         view.isVerticallyResizable = true
         view.isHorizontallyResizable = false
         view.autoresizingMask = [.width]
@@ -772,10 +830,36 @@ struct WhiteboardView: NSViewRepresentable {
         var last: String?
     }
 
-    private static func html(_ svg: String) -> String {
-        let drawing = svg.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            ? "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1000 700\"></svg>"
-            : svg
+    private static let roughJS = asset("rough")
+    private static let boardJS = asset("board")
+
+    private static func asset(_ name: String) -> String {
+        guard let data = NSDataAsset(name: name)?.data,
+              let text = String(data: data, encoding: .utf8) else { return "" }
+        return text
+    }
+
+    private static func html(_ drawing: String) -> String {
+        let trimmed = drawing.trimmingCharacters(in: .whitespacesAndNewlines)
+        let picture: String
+        let scripts: String
+        if trimmed.hasPrefix("{") {
+            let json = trimmed
+                .replacingOccurrences(of: "<", with: "\\u003c")
+                .replacingOccurrences(of: "\u{2028}", with: "\\u2028")
+                .replacingOccurrences(of: "\u{2029}", with: "\\u2029")
+            picture = "<svg id=\"pic\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1000 700\"></svg>"
+            scripts = """
+            <script>\(roughJS)</script>
+            <script>\(boardJS)</script>
+            <script>renderBoard(\(json));</script>
+            """
+        } else {
+            picture = trimmed.isEmpty
+                ? "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1000 700\"></svg>"
+                : trimmed
+            scripts = ""
+        }
         return """
         <!DOCTYPE html>
         <html>
@@ -788,7 +872,7 @@ struct WhiteboardView: NSViewRepresentable {
           #board svg { width: 100%; height: 100%; display: block; }
         </style>
         </head>
-        <body><div id="board">\(drawing)</div></body>
+        <body><div id="board">\(picture)</div>\(scripts)</body>
         </html>
         """
     }

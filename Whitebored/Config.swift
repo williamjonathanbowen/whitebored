@@ -4,6 +4,7 @@ enum Config {
     static let model = "claude-sonnet-5"
     static let ttsModel = "gpt-4o-mini-tts"
     static let ttsVoice = "ash"
+    static let ttsSpeeds: [Double] = [1, 1.25, 1.5, 1.75, 2]
     static let ttsVoices = [
         "alloy", "ash", "ballad", "coral", "echo", "fable",
         "nova", "onyx", "sage", "shimmer", "verse", "marin", "cedar",
