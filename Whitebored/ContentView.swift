@@ -117,12 +117,19 @@ struct GoalView: View {
             .focused($focused)
             .tint(.black)
             .frame(maxWidth: 760)
+            .disabled(session.askingWhoStarts)
             .onSubmit {
-                Task { await session.start() }
+                session.offerStart()
+                focused = false
             }
-            Text("one line.")
-                .font(.system(size: 13))
-                .foregroundStyle(.black.opacity(0.3))
+            if session.askingWhoStarts {
+                WhoStartsPopup()
+                    .transition(.opacity.combined(with: .scale(scale: 0.98)))
+            } else {
+                Text("one line.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.black.opacity(0.3))
+            }
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -135,6 +142,53 @@ struct GoalView: View {
             .padding(10)
         }
         .onAppear { focused = true }
+        .animation(.easeInOut(duration: 0.16), value: session.askingWhoStarts)
+    }
+}
+
+struct WhoStartsPopup: View {
+    @Environment(Session.self) private var session
+
+    var body: some View {
+        VStack(spacing: 14) {
+            Text("who starts?")
+                .font(.system(size: 13))
+                .foregroundStyle(.black.opacity(0.3))
+            HStack(spacing: 28) {
+                WhoStartsChoice(title: "me (whitebored)") {
+                    Task { await session.chooseWhoStarts(whiteboredFirst: true) }
+                }
+                WhoStartsChoice(title: "you") {
+                    Task { await session.chooseWhoStarts(whiteboredFirst: false) }
+                }
+            }
+        }
+        .padding(.horizontal, 28)
+        .padding(.vertical, 18)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .shadow(color: .black.opacity(0.08), radius: 16, y: 6)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color.black.opacity(0.06), lineWidth: 1)
+        )
+    }
+}
+
+private struct WhoStartsChoice: View {
+    let title: String
+    let action: () -> Void
+    @State private var hover = false
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 15))
+                .foregroundStyle(.black.opacity(hover ? 0.78 : 0.42))
+        }
+        .buttonStyle(.plain)
+        .onHover { hover = $0 }
+        .animation(.easeInOut(duration: 0.12), value: hover)
     }
 }
 
