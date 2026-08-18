@@ -40,6 +40,7 @@ final class Session {
     var showHistory = false
     var showSettings = false
     var showTimeline = false
+    var askingWhoStarts = false
     var typeSize: Double
     var typeface: String
     var voice: String
@@ -93,9 +94,26 @@ final class Session {
         }
     }
 
+    func offerStart() {
+        let trimmed = goal.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        goal = trimmed
+        askingWhoStarts = true
+    }
+
+    func chooseWhoStarts(whiteboredFirst: Bool) async {
+        guard askingWhoStarts else { return }
+        askingWhoStarts = false
+        await start()
+        if whiteboredFirst {
+            await send()
+        }
+    }
+
     func start() async {
         let trimmed = goal.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
+        askingWhoStarts = false
         persistCurrent()
         goal = trimmed
         let lesson = LessonRecord(
@@ -278,6 +296,7 @@ final class Session {
         photoCount = 0
         history = []
         status = .silent
+        askingWhoStarts = false
         phase = .goal
         showHistory = false
         showSettings = false
@@ -307,6 +326,7 @@ final class Session {
         photoCount = lesson.photoCount
         history = lesson.messages.map { ChatMessage(role: $0.role, blocks: [.text($0.text)]) }
         status = .silent
+        askingWhoStarts = false
         phase = .session
         showHistory = false
         showSettings = false
